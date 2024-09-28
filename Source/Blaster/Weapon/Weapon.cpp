@@ -2,9 +2,12 @@
 
 
 #include "Weapon.h"
+
+#include "Casing.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Blaster/Character/BlasterCharacter.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -87,5 +90,22 @@ void AWeapon::ShowPickupWidget(bool bShowWidget)
 	if (PickupWidget)
 	{
 		PickupWidget->SetVisibility(bShowWidget);
+	}
+}
+
+void AWeapon::Fire(const FVector& HitTarget)
+{
+	if(FireAnimation)
+	{
+		WeaponMesh->PlayAnimation(FireAnimation, false);
+	}
+	if(CasingClass)
+	{
+		FTransform AmmoEject = GetWeaponMesh()->GetSocketTransform(FName("AmmoEject"));
+		UWorld* World = GetWorld();
+		if(World)
+		{
+			World->SpawnActor<ACasing>(CasingClass, AmmoEject.GetLocation(),AmmoEject.GetRotation().Rotator());
+		}
 	}
 }
