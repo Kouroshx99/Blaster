@@ -5,6 +5,7 @@
 
 #include "Blaster/Blaster.h"
 #include "Blaster/BlasterComponents/CombatComponent.h"
+#include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -46,6 +47,15 @@ ABlasterCharacter::ABlasterCharacter()
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 }
 
+void ABlasterCharacter::UpdateHUDHealth()
+{
+	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller):BlasterPlayerController;
+	if(BlasterPlayerController)
+	{
+		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
+	}
+}
+
 void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -53,6 +63,12 @@ void ABlasterCharacter::BeginPlay()
 	{
 		Combat->EquipWeapon(WeaponToEquip);
 	}
+
+	Health = MaxHealth;
+
+	UpdateHUDHealth();
+
+	OnTakeAnyDamage.AddDynamic(this, &ABlasterCharacter::ReceiveDamage);
 }
 
 void ABlasterCharacter::PostInitializeComponents()
@@ -264,6 +280,14 @@ void ABlasterCharacter::FireButtonReleased()
 	{
 		Combat->FireButtonPressed(false);
 	}
+}
+
+void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
+	AController* InstigatorController, AActor* DamageCauser)
+{
+	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
+	UpdateHUDHealth();
+	PlayHitReactMontage();
 }
 
 void ABlasterCharacter::TurnInPlace(float DeltaTime)

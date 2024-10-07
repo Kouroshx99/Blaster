@@ -15,6 +15,7 @@ class BLASTER_API ABlasterCharacter : public ACharacter, public IInteractWithCro
 
 public:
 	ABlasterCharacter();
+	void UpdateHUDHealth();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void PostInitializeComponents() override;
@@ -37,6 +38,9 @@ protected:
 	virtual void Jump() override;
 	void FireButtonPressed();
 	void FireButtonReleased();
+
+	UFUNCTION()
+	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -75,6 +79,14 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float CameraThreshold = 200.f;
+
+	UPROPERTY(EditAnywhere, Category="Player Stats")
+	float MaxHealth = 100.f;
+
+	UPROPERTY(VisibleAnywhere, Category="Player Stats")
+	float Health;
+
+	class ABlasterPlayerController* BlasterPlayerController;
 
 public:	
 	void SetOverlappingWeapon(AWeapon* Weapon);

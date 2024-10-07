@@ -58,11 +58,11 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Hit.Location);
 	}
 
-	ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(OtherActor);
-	if(BlasterCharacter)
-	{
-		BlasterCharacter->PlayHitReactMontage();
-	}
+	//ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(OtherActor);
+	//if(BlasterCharacter)
+	//{
+	//	BlasterCharacter->PlayHitReactMontage();
+	//}
 	Destroy();
 }
 
