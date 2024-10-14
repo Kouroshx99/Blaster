@@ -94,6 +94,9 @@ public:
 	bool IsAiming();
 
 	UPROPERTY(EditInstanceOnly)
+	bool bIsDummy = false;
+
+	UPROPERTY(EditInstanceOnly)
 	AWeapon* WeaponToEquip;
 	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw;}
 	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch;}

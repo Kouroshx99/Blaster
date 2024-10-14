@@ -122,6 +122,7 @@ void ABlasterCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	AimOffset(DeltaTime);
 	HideCameraIfCharacterClose();
+
 }
 
 void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -211,6 +212,8 @@ void ABlasterCharacter::AimButtonReleased()
 void ABlasterCharacter::CalculateAOPitch()
 {
 	AO_Pitch = GetBaseAimRotation().Pitch;
+	//if(bIsDummy)
+	//	AO_Pitch = 0.f;
 	if (AO_Pitch > 90.f && !IsLocallyControlled())
 	{
 		// map pitch from [270, 360) to [-90, 0)
@@ -222,7 +225,7 @@ void ABlasterCharacter::CalculateAOPitch()
 
 void ABlasterCharacter::AimOffset(float DeltaTime)
 {
-	if (Combat && Combat->EquippedWeapon == nullptr)
+	if ((Combat && Combat->EquippedWeapon == nullptr))
 	{
 		return;
 	}
@@ -250,7 +253,8 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		bUseControllerRotationYaw = true;
 		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	}
-
+	//if(bIsDummy)
+	//	AO_Yaw = 0.f;
 	CalculateAOPitch();
 }
 

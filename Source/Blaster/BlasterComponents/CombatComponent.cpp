@@ -99,6 +99,8 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 	SetHUDCrosshairs(DeltaTime);
 	InterpFOV(DeltaTime);
+	if(Character->bIsDummy)
+		Fire();
 }
 
 void UCombatComponent::SetAiming(bool bIsAiming)
@@ -140,6 +142,8 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 
 void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 {
+	if(Character->bIsDummy)
+		return;
 	FVector2d ViewportSize;
 	if(GEngine && GEngine->GameViewport)
 	{
@@ -159,7 +163,6 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		{
 			float DistanceToCharacter = (Character->GetActorLocation() - Start).Size();
 			Start += CrosshairWorldDirection * (DistanceToCharacter + 100.f);
-			//DrawDebugSphere(GetWorld(), Start, 16.f, 12, FColor::Red, false);
 		}
 
 		
