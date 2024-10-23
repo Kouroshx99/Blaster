@@ -21,7 +21,9 @@ public:
 	virtual void PostInitializeComponents() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	void PlayFireMontage(bool bAiming);
+	void PlayElimMontage();
 	void PlayHitReactMontage();
+	void Elim();
 protected:
 	virtual void BeginPlay() override;
 
@@ -73,7 +75,10 @@ private:
 	class UAnimMontage* FireWeaponMontage;
 
 	UPROPERTY(EditAnywhere, Category=Combat)
-	class UAnimMontage* HitReactMontage;
+	UAnimMontage* HitReactMontage;
+
+	UPROPERTY(EditAnywhere, Category=Combat)
+	UAnimMontage* ElimMontage;
 
 	void HideCameraIfCharacterClose();
 
@@ -86,7 +91,16 @@ private:
 	UPROPERTY(VisibleAnywhere, Category="Player Stats")
 	float Health;
 
+	bool bElimmed = false;
+
 	class ABlasterPlayerController* BlasterPlayerController;
+
+	FTimerHandle ElimTimer;
+
+	UPROPERTY(EditDefaultsOnly)
+	float ElimDelay = 3.f;
+
+	void ElimTimerFinished();
 
 public:	
 	void SetOverlappingWeapon(AWeapon* Weapon);
@@ -104,4 +118,5 @@ public:
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace;}
 	FVector GetHitTarget() const;
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	FORCEINLINE bool IsElimmed() const {return bElimmed; }
 };
