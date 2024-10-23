@@ -80,8 +80,17 @@ void AWeapon::SetWeaponState(EWeaponState State)
 		{
 			ShowPickupWidget(false);
 			AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			WeaponMesh->SetSimulatePhysics(false);
+			WeaponMesh->SetEnableGravity(false);
+			WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			break;
 		}
+	case EWeaponState::EWS_Dropped:
+		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		WeaponMesh->SetSimulatePhysics(true);
+		WeaponMesh->SetEnableGravity(true);
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		break;
 	}
 }
 
@@ -108,4 +117,12 @@ void AWeapon::Fire(const FVector& HitTarget)
 			World->SpawnActor<ACasing>(CasingClass, AmmoEject.GetLocation(),AmmoEject.GetRotation().Rotator());
 		}
 	}
+}
+
+void AWeapon::Dropped()
+{
+	SetWeaponState(EWeaponState::EWS_Dropped);
+	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
+	WeaponMesh->DetachFromComponent(DetachRules);
+	SetOwner(nullptr);
 }

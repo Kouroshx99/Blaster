@@ -5,8 +5,11 @@
 #include "CoreMinimal.h"
 #include "Blaster/BlasterTypes/TurningInPlace.h"
 #include "Blaster/Interfaces/InteractWithCrosshairInterface.h"
+#include "Components/TimelineComponent.h"
 #include "GameFramework/Character.h"
 #include "BlasterCharacter.generated.h"
+
+class UTimelineComponent;
 
 UCLASS()
 class BLASTER_API ABlasterCharacter : public ACharacter, public IInteractWithCrosshairInterface
@@ -101,6 +104,24 @@ private:
 	float ElimDelay = 3.f;
 
 	void ElimTimerFinished();
+	
+	UPROPERTY(VisibleAnywhere)
+	UTimelineComponent* DissolveTimeLine;
+
+	FOnTimelineFloat DissolveTrack;
+
+	UPROPERTY(EditAnywhere)
+	UCurveFloat* DissolveCurve;
+
+	UPROPERTY(VisibleAnywhere, Category=Elim)
+	UMaterialInstanceDynamic* DynamicDissolveMaterialInstance;
+
+	UPROPERTY(EditAnywhere, Category=Elim)
+	UMaterialInstance* DissolveMaterialInstance;
+
+	UFUNCTION()
+	void UpdateDissolveMaterial(float DissolveValue);
+	void StartDissolve();
 
 public:	
 	void SetOverlappingWeapon(AWeapon* Weapon);
@@ -119,4 +140,6 @@ public:
 	FVector GetHitTarget() const;
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE bool IsElimmed() const {return bElimmed; }
+	FORCEINLINE float GetHealth() const {return Health;}
+	FORCEINLINE float GetMaxHealth() const {return MaxHealth;}
 };
