@@ -46,6 +46,10 @@ protected:
 
 	UFUNCTION()
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
+	//Poll for any relevant changes
+	void PollInit();
+
+	class ABlasterPlayerState* BlasterPlayerState;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)

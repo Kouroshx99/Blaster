@@ -13,5 +13,19 @@ UCLASS()
 class BLASTER_API ABlasterPlayerState : public APlayerState
 {
 	GENERATED_BODY()
+
+public:
+	virtual void OnRep_Score() override;
+	void AddScore(float ScoreAmount);
+	void AddToDefeats();
+
+private:
+	UPROPERTY()
+	class ABlasterCharacter* Character;
+
+	UPROPERTY()
+	class ABlasterPlayerController* Controller;
+
+	int32 Defeats;
 	
 };
