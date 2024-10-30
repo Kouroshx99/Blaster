@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "WeaponTypes.h"
 #include "GameFramework/Actor.h"
 #include "Weapon.generated.h"
 
@@ -27,6 +28,7 @@ public:
 	void ShowPickupWidget(bool bShowWidget);
 	virtual void Fire(const FVector& HitTarget);
 	void Dropped();
+	void SetHUDAmmo();
 
 	UPROPERTY(EditAnywhere, Category=Crosshairs)
 	class UTexture2D* CrosshairsCenter;
@@ -48,6 +50,16 @@ public:
 
 	UPROPERTY(EditAnywhere, Category=Combat)
 	bool bAutomatic = true;
+
+	void SpendRound();
+
+	UPROPERTY()
+	class ABlasterCharacter* BlasterOwnerCharacter;
+
+	UPROPERTY()
+	class ABlasterPlayerController* BlasterOwnerController;
+
+	EWeaponType WeaponType;
 
 protected:
 	virtual void BeginPlay() override;
@@ -84,7 +96,7 @@ private:
 	class UWidgetComponent* PickupWidget;
 
 	UPROPERTY(EditAnywhere, Category="Weapon Properties")
-	class UAnimationAsset* FireAnimation;
+	UAnimationAsset* FireAnimation;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ACasing> CasingClass;
@@ -94,6 +106,12 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float ZoomedInterpSpeed = 30.f;
+
+	UPROPERTY(EditAnywhere)
+	int32 Ammo = 30;
+
+	UPROPERTY(EditAnywhere)
+	int32 MagCapacity = 30;
 	
 public:	
 	void SetWeaponState(EWeaponState State);
@@ -101,5 +119,6 @@ public:
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh;}
 	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV;}
 	FORCEINLINE float GetZoomedInterpSpeed() const { return ZoomedFOV; }
-
+	bool IsEmpty();
+	FORCEINLINE EWeaponType GetWeaponType() const {return WeaponType; }
 };

@@ -21,23 +21,6 @@ UCombatComponent::UCombatComponent()
 
 }
 
-void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
-{
-	if(Character == nullptr || WeaponToEquip == nullptr) return;
-
-	EquippedWeapon = WeaponToEquip;
-	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
-	//EquippedWeapon->GetWeaponMesh()->SetOwner(Character);
-	const USkeletalMeshSocket* RightHandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
-	if(RightHandSocket)
-	{
-		RightHandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
-	}
-	EquippedWeapon->SetOwner(Character);
-	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
-	Character->bUseControllerRotationYaw = true;
-}
-
 void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -51,8 +34,62 @@ void UCombatComponent::BeginPlay()
 			DefaultFOV = Character->GetFollowCamera()->FieldOfView;
 			CurrentFOV = DefaultFOV;
 		}
+		InitializeCarriedAmmo();
 	}
 	
+}
+
+void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	FHitResult HitResult;
+	TraceUnderCrosshairs(HitResult);
+	HitTarget = HitResult.ImpactPoint;
+
+	SetHUDCrosshairs(DeltaTime);
+	InterpFOV(DeltaTime);
+	if(Character->bIsDummy)
+		Fire();
+}
+
+void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
+{
+	if(Character == nullptr || WeaponToEquip == nullptr) return;
+	if(EquippedWeapon)
+	{
+		EquippedWeapon->Dropped();
+	}
+	EquippedWeapon = WeaponToEquip;
+	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	const USkeletalMeshSocket* RightHandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
+	if(RightHandSocket)
+	{
+		RightHandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
+	}
+	EquippedWeapon->SetOwner(Character);
+	EquippedWeapon->SetHUDAmmo();
+
+	if(CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
+	{
+		CarriedAmmo = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
+	}
+	Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller): Controller;
+	if(Controller)
+	{
+		Controller->SetHUDCarriedAmmo(CarriedAmmo);
+	}
+	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+	Character->bUseControllerRotationYaw = true;
+}
+
+void UCombatComponent::Reload()
+{
+	if(CarriedAmmo > 0)
+	{
+		if(Character)
+			Character->PlayReloadMontage();
+	}
 }
 
 void UCombatComponent::InterpFOV(float DeltaTime)
@@ -89,18 +126,16 @@ void UCombatComponent::FinishFireTimer()
 	}
 }
 
-void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+bool UCombatComponent::CanFire()
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	if(EquippedWeapon == nullptr)
+		return false;
+	return !EquippedWeapon->IsEmpty() && bCanFire;
+}
 
-	FHitResult HitResult;
-	TraceUnderCrosshairs(HitResult);
-	HitTarget = HitResult.ImpactPoint;
-
-	SetHUDCrosshairs(DeltaTime);
-	InterpFOV(DeltaTime);
-	if(Character->bIsDummy)
-		Fire();
+void UCombatComponent::InitializeCarriedAmmo()
+{
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, StartingARAmmo);
 }
 
 void UCombatComponent::SetAiming(bool bIsAiming)
@@ -114,7 +149,7 @@ void UCombatComponent::SetAiming(bool bIsAiming)
 
 void UCombatComponent::Fire()
 {
-	if(bCanFire)
+	if(CanFire())
 	{
 		Character->PlayFireMontage(bAiming);
 		EquippedWeapon->Fire(HitTarget);

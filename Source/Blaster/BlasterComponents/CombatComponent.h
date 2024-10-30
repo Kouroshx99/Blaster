@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blaster/HUD/BlasterHUD.h"
+#include "Blaster/Weapon/WeaponTypes.h"
 #include "Components/ActorComponent.h"
 #include "CombatComponent.generated.h"
 
@@ -19,15 +20,14 @@ public:
 	friend class ABlasterCharacter;
 
 	void EquipWeapon(class AWeapon* WeaponToEquip);
+	void Reload();
 protected:
 	virtual void BeginPlay() override;
 	void SetAiming(bool bIsAiming);
 	void Fire();
 
 	void FireButtonPressed(bool bPressed);
-
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
-
 	void SetHUDCrosshairs(float DeltaTime);
 
 private:
@@ -72,10 +72,17 @@ private:
 
 	void StartFireTimer();
 	void FinishFireTimer();
+
+	bool CanFire();
+	int32 CarriedAmmo;
+
+	TMap<EWeaponType, int32> CarriedAmmoMap;
+
+	UPROPERTY(EditAnywhere)
+	int32 StartingARAmmo = 30;
+
+	void InitializeCarriedAmmo();
+
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-
-
-		
 };

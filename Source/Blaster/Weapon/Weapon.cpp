@@ -4,9 +4,11 @@
 #include "Weapon.h"
 
 #include "Casing.h"
+#include "MathUtil.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Blaster/Character/BlasterCharacter.h"
+#include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -29,6 +31,12 @@ AWeapon::AWeapon()
 
 	PickupWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));
 	PickupWidget->SetupAttachment(RootComponent);
+}
+
+void AWeapon::SpendRound()
+{
+	Ammo = FMathf::Clamp(Ammo - 1, 0, MagCapacity);
+	SetHUDAmmo();
 }
 
 void AWeapon::BeginPlay()
@@ -94,6 +102,11 @@ void AWeapon::SetWeaponState(EWeaponState State)
 	}
 }
 
+bool AWeapon::IsEmpty()
+{
+	return Ammo <= 0;
+}
+
 void AWeapon::ShowPickupWidget(bool bShowWidget)
 {
 	if (PickupWidget)
@@ -117,6 +130,7 @@ void AWeapon::Fire(const FVector& HitTarget)
 			World->SpawnActor<ACasing>(CasingClass, AmmoEject.GetLocation(),AmmoEject.GetRotation().Rotator());
 		}
 	}
+	SpendRound();
 }
 
 void AWeapon::Dropped()
@@ -125,4 +139,21 @@ void AWeapon::Dropped()
 	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
 	WeaponMesh->DetachFromComponent(DetachRules);
 	SetOwner(nullptr);
+	BlasterOwnerCharacter = nullptr;
+	BlasterOwnerController = nullptr;
+}
+
+void AWeapon::SetHUDAmmo()
+{
+	BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(GetOwner()): BlasterOwnerCharacter;
+	if(BlasterOwnerCharacter)
+	{
+		BlasterOwnerController = BlasterOwnerController == nullptr?
+			Cast<ABlasterPlayerController>(BlasterOwnerCharacter->GetController()):
+			BlasterOwnerController;
+		if(BlasterOwnerController)
+		{
+			BlasterOwnerController->SetHUDWeaponAmmo(Ammo);
+		}
+	}
 }
