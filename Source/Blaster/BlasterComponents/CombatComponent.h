@@ -10,6 +10,8 @@
 
 #define TRACE_LENGHT 80000;
 
+enum class ECombatState : uint8;
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BLASTER_API UCombatComponent : public UActorComponent
 {
@@ -21,6 +23,9 @@ public:
 
 	void EquipWeapon(class AWeapon* WeaponToEquip);
 	void Reload();
+	void UpdateAmmoValues();
+	UFUNCTION(BlueprintCallable)
+	void FinishReloading();
 protected:
 	virtual void BeginPlay() override;
 	void SetAiming(bool bIsAiming);
@@ -29,6 +34,7 @@ protected:
 	void FireButtonPressed(bool bPressed);
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 	void SetHUDCrosshairs(float DeltaTime);
+	int32 AmountToReload();
 
 private:
 	class ABlasterCharacter* Character;
@@ -79,10 +85,12 @@ private:
 	TMap<EWeaponType, int32> CarriedAmmoMap;
 
 	UPROPERTY(EditAnywhere)
-	int32 StartingARAmmo = 30;
+	int32 StartingARAmmo = 60;
 
 	void InitializeCarriedAmmo();
 
+	ECombatState CombatState;
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	void HandleReload();
 };

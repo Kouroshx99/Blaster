@@ -29,6 +29,7 @@ public:
 	virtual void Fire(const FVector& HitTarget);
 	void Dropped();
 	void SetHUDAmmo();
+	void AddAmmo(int32 AmmoToAdd);
 
 	UPROPERTY(EditAnywhere, Category=Crosshairs)
 	class UTexture2D* CrosshairsCenter;
@@ -51,6 +52,9 @@ public:
 	UPROPERTY(EditAnywhere, Category=Combat)
 	bool bAutomatic = true;
 
+	UPROPERTY(EditAnywhere, Category=Combat)
+	class USoundCue* EquipSound;
+
 	void SpendRound();
 
 	UPROPERTY()
@@ -58,8 +62,6 @@ public:
 
 	UPROPERTY()
 	class ABlasterPlayerController* BlasterOwnerController;
-
-	EWeaponType WeaponType;
 
 protected:
 	virtual void BeginPlay() override;
@@ -112,6 +114,8 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	int32 MagCapacity = 30;
+
+	EWeaponType WeaponType;
 	
 public:	
 	void SetWeaponState(EWeaponState State);
@@ -121,4 +125,6 @@ public:
 	FORCEINLINE float GetZoomedInterpSpeed() const { return ZoomedFOV; }
 	bool IsEmpty();
 	FORCEINLINE EWeaponType GetWeaponType() const {return WeaponType; }
+	FORCEINLINE int32 GetAmmo() const {return Ammo; }
+	FORCEINLINE int32 GetMagCapacity() const {return MagCapacity; }
 };
