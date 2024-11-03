@@ -52,7 +52,7 @@ public:
 	UPROPERTY(EditAnywhere, Category=Combat)
 	bool bAutomatic = true;
 
-	UPROPERTY(EditAnywhere, Category=Combat)
+	UPROPERTY(EditAnywhere, Category=Weapon)
 	class USoundCue* EquipSound;
 
 	void SpendRound();
@@ -115,6 +115,7 @@ private:
 	UPROPERTY(EditAnywhere)
 	int32 MagCapacity = 30;
 
+	UPROPERTY(EditAnywhere)
 	EWeaponType WeaponType;
 	
 public:	

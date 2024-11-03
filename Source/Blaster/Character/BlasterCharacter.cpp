@@ -175,11 +175,12 @@ void ABlasterCharacter::Elim()
 
 	GetCharacterMovement()->DisableMovement();
 	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->DisableMovement();
 	if(BlasterPlayerController)
 	{
 		DisableInput(BlasterPlayerController);
 	}
-
+	
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
