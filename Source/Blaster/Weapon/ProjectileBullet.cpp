@@ -4,12 +4,15 @@
 #include "ProjectileBullet.h"
 
 #include "GameFramework/Character.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 
 AProjectileBullet::AProjectileBullet()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
+	ProjectileMovementComponent->bRotationFollowsVelocity = true;
 }
 
 void AProjectileBullet::BeginPlay()
