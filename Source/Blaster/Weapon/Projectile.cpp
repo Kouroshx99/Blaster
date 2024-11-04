@@ -50,11 +50,11 @@ void AProjectile::PlayImpactParticles()
 	}
 }
 
-void AProjectile::PlayImpactSound(const FHitResult& Hit)
+void AProjectile::PlayImpactSound(const FVector& Location)
 {
 	if(ImpactSound)
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Hit.Location);
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Location);
 	}
 }
 
@@ -62,7 +62,7 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
                         FVector NormalImpulse, const FHitResult& Hit)
 {
 	PlayImpactParticles();
-	PlayImpactSound(Hit);
+	PlayImpactSound(Hit.Location);
 	
 	Destroy();
 }
@@ -72,3 +72,39 @@ void AProjectile::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+void AProjectile::StartDestroyTimer()
+{
+	GetWorldTimerManager().SetTimer(
+		DestroyTimer,
+		this,
+		&AProjectile::DestroyTimeFinished,
+		DestroyTime);
+}
+
+void AProjectile::DestroyTimeFinished()
+{
+	Destroy();
+}
+
+void AProjectile::ExplodeDamage()
+{
+	APawn* FiringPawn = GetInstigator();
+	if(FiringPawn)
+	{
+		AController* FiringController = FiringPawn->GetController();
+		if(FiringController)
+		{
+			UGameplayStatics::ApplyRadialDamageWithFalloff(this,
+				Damage,
+				10.f,
+				GetActorLocation(),
+				DamageInnerRadius,
+				DamageOuterRadius,
+				1.f,
+				UDamageType::StaticClass(),
+				TArray<AActor*>(),
+				this,
+				FiringController);
+		}
+	}
+}

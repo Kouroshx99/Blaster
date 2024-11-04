@@ -73,6 +73,9 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UCombatComponent* Combat;
 
+	UPROPERTY(VisibleAnywhere)
+	class UBuffComponent* Buff;
+
 	float AO_Yaw;
 	float InterpAO_Yaw;
 	float AO_Pitch;
@@ -152,6 +155,9 @@ public:
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE bool IsElimmed() const {return bElimmed; }
 	FORCEINLINE float GetHealth() const {return Health;}
+	FORCEINLINE void SetHealth(float Amount) { Health = Amount; }
 	FORCEINLINE float GetMaxHealth() const {return MaxHealth;}
 	FORCEINLINE ECombatState GetCombatState() const {return Combat? Combat->CombatState:ECombatState::ECS_MAX;}
+	FORCEINLINE UCombatComponent* GetCombat() const {return Combat; }
+	FORCEINLINE UBuffComponent* GetBuff() const { return Buff; }
 };

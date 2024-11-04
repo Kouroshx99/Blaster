@@ -51,7 +51,7 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 	SetHUDCrosshairs(DeltaTime);
 	InterpFOV(DeltaTime);
-	if(Character->bIsDummy)
+	if(Character && Character->bIsDummy)
 		Fire();
 }
 
@@ -106,6 +106,7 @@ void UCombatComponent::Reload()
 
 void UCombatComponent::UpdateAmmoValues()
 {
+	if(Character == nullptr || EquippedWeapon == nullptr) return;
 	int32 ReloadAmount = AmountToReload();
 
 	if(CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
@@ -134,6 +135,17 @@ void UCombatComponent::FinishReloading()
 void UCombatComponent::HandleReload()
 {
 	Character->PlayReloadMontage();
+}
+
+void UCombatComponent::PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount)
+{
+	if(CarriedAmmoMap.Contains(WeaponType))
+	{
+		CarriedAmmoMap[WeaponType] = FMath::Clamp(CarriedAmmoMap[WeaponType] + AmmoAmount, 0, MaxCarriedAmmo);
+		UpdateAmmoValues();
+	}
+	if(EquippedWeapon && EquippedWeapon->IsEmpty() && EquippedWeapon->GetWeaponType() == WeaponType)
+		Reload();
 }
 
 void UCombatComponent::InterpFOV(float DeltaTime)
@@ -187,6 +199,7 @@ void UCombatComponent::InitializeCarriedAmmo()
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_SubMachineGun, StartingSMGAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_Shotgun, StartingShotgunAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_SniperRifle, StartingSniperAmmo);
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_GrenadeLauncher, StartingGrenadeLauncherAmmo);
 }
 
 void UCombatComponent::SetAiming(bool bIsAiming)
@@ -228,7 +241,7 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 
 void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 {
-	if(Character->bIsDummy)
+	if(Character == nullptr || Character->bIsDummy)
 		return;
 	FVector2d ViewportSize;
 	if(GEngine && GEngine->GameViewport)

@@ -85,6 +85,9 @@ private:
 	TMap<EWeaponType, int32> CarriedAmmoMap;
 
 	UPROPERTY(EditAnywhere)
+	int32 MaxCarriedAmmo = 200;
+
+	UPROPERTY(EditAnywhere)
 	int32 StartingARAmmo = 60;
 	UPROPERTY(EditAnywhere)
 	int32 StartingRocketAmmo = 20;
@@ -96,6 +99,8 @@ private:
 	int32 StartingShotgunAmmo = 0;
 	UPROPERTY(EditAnywhere)
 	int32 StartingSniperAmmo = 10;
+	UPROPERTY(EditAnywhere)
+	int32 StartingGrenadeLauncherAmmo = 5;
 
 	void InitializeCarriedAmmo();
 
@@ -103,4 +108,6 @@ private:
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void HandleReload();
+
+	void PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount);
 };

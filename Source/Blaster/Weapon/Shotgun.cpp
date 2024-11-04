@@ -11,7 +11,7 @@
 
 void AShotgun::Fire(const FVector& HitTarget)
 {
-	//Super::Fire(HitTarget);
+	Super::Fire(HitTarget);
 	const USkeletalMeshSocket* MuzzleSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash");
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
 	if(!OwnerPawn)
