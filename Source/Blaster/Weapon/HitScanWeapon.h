@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Weapon.h"
+#include "WeaponTypes.h"
 #include "HitScanWeapon.generated.h"
 
 /**
@@ -17,13 +18,19 @@ public:
 	virtual void Fire(const FVector& HitTarget) override;
 protected:
 	FVector TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget);
-private:
+	void WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit);
+	
 	UPROPERTY(EditAnywhere)
 	float Damage = 20.f;
-
+	
 	UPROPERTY(EditAnywhere)
 	class UParticleSystem* ImpactParticles;
+	
+	UPROPERTY(EditAnywhere)
+	USoundCue* HitSound;
+private:
 
+	
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* BeamParticles;
 
@@ -32,9 +39,6 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	USoundCue* FireSound;
-
-	UPROPERTY(EditAnywhere)
-	USoundCue* HitSound;
 
 	UPROPERTY(EditAnywhere, Category="Weapon Scatter")
 	float DistanceToSphere = 800.f;

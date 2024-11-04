@@ -84,11 +84,6 @@ void ABlasterCharacter::PostInitializeComponents()
 	}
 }
 
-void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-}
-
 void ABlasterCharacter::PlayFireMontage(bool bAiming)
 {
 	if (Combat == nullptr || Combat->EquippedWeapon == nullptr)
@@ -132,6 +127,9 @@ void ABlasterCharacter::PlayReloadMontage()
 			SectionName = FName("Rifle");
 			break;
 		case EWeaponType::EWT_Shotgun:
+			SectionName = FName("Rifle");
+			break;
+		case EWeaponType::EWT_SniperRifle:
 			SectionName = FName("Rifle");
 			break;
 		}
@@ -195,6 +193,11 @@ void ABlasterCharacter::Elim()
 	
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	bool bHideSniperScope = Combat && Combat->bAiming &&
+		Combat->EquippedWeapon &&
+			Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
+	if(bHideSniperScope)
+		ShowSniperScopeWidget(false);
 }
 
 void ABlasterCharacter::Tick(float DeltaTime)
@@ -342,8 +345,6 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		bUseControllerRotationYaw = true;
 		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	}
-	//if(bIsDummy)
-	//	AO_Yaw = 0.f;
 	CalculateAOPitch();
 }
 
@@ -516,16 +517,4 @@ FVector ABlasterCharacter::GetHitTarget() const
 	if(Combat == nullptr)
 		return FVector();
 	return Combat->HitTarget;
-}
-
-void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
-{
-	if (OverlappingWeapon)
-	{
-		OverlappingWeapon->ShowPickupWidget(true);
-	}
-	if (LastWeapon)
-	{
-		LastWeapon->ShowPickupWidget(false);
-	}
 }

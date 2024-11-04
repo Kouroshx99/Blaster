@@ -186,15 +186,16 @@ void UCombatComponent::InitializeCarriedAmmo()
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_Pistol, StartingPistolAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_SubMachineGun, StartingSMGAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_Shotgun, StartingShotgunAmmo);
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_SniperRifle, StartingSniperAmmo);
 }
 
 void UCombatComponent::SetAiming(bool bIsAiming)
 {
+	if(Character == nullptr || EquippedWeapon == nullptr) return;
 	bAiming = bIsAiming;
-	if(Character)
-	{
-		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming? AimWalkSpeed:BaseWalkSpeed;
-	}
+	Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming? AimWalkSpeed:BaseWalkSpeed;
+	if(EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle)
+		Character->ShowSniperScopeWidget(bIsAiming);
 }
 
 void UCombatComponent::Fire()

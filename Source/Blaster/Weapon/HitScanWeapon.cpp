@@ -6,6 +6,8 @@
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMaterialLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
 
@@ -21,56 +23,39 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 	{
 		FTransform MuzzleSocketTransform = MuzzleSocket->GetSocketTransform(GetWeaponMesh());
 		FVector Start = MuzzleSocketTransform.GetLocation();
-		FVector End = Start + (HitTarget - Start) * 1.25f;
-
+		
 		FHitResult FireHit;
-		UWorld * World = GetWorld();
-		if(World)
-		{
-			World->LineTraceSingleByChannel(FireHit,
-				Start,
-				End,
-				ECC_Visibility);
-			FVector BeamEnd = End;
-			if(FireHit.bBlockingHit)
-			{
-				BeamEnd = FireHit.ImpactPoint;
-				ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor());
-				if(BlasterCharacter)
-				{
-					UGameplayStatics::ApplyDamage(BlasterCharacter,
-						Damage,
-						InstigatorController,
-						this,
-						UDamageType::StaticClass());
-					
-				}
-				if(ImpactParticles)
-				{
-					UGameplayStatics::SpawnEmitterAtLocation(World,
-						ImpactParticles,
-						FireHit.ImpactPoint,
-						FireHit.ImpactNormal.Rotation());
-				}
+		WeaponTraceHit(Start, HitTarget, FireHit);
 
-				if(HitSound)
-				{
-					UGameplayStatics::PlaySoundAtLocation(this,
-						HitSound,
-						FireHit.ImpactPoint);
-				}
-				
-			}
-			if(BeamParticles)
+		UWorld* World = GetWorld();
+
+		if(FireHit.bBlockingHit)
+		{
+			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor());
+			if(BlasterCharacter)
 			{
-				UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(World,
-					BeamParticles,
-					MuzzleSocketTransform);
-				if(Beam)
-				{
-					Beam->SetVectorParameter(FName("Target"), BeamEnd);
-				}
+				UGameplayStatics::ApplyDamage(BlasterCharacter,
+					Damage,
+					InstigatorController,
+					this,
+					UDamageType::StaticClass());
+					
 			}
+			if(ImpactParticles)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(World,
+					ImpactParticles,
+					FireHit.ImpactPoint,
+					FireHit.ImpactNormal.Rotation());
+			}
+
+			if(HitSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(this,
+					HitSound,
+					FireHit.ImpactPoint);
+			}
+				
 		}
 
 		if(MuzzleFlash)
@@ -92,8 +77,50 @@ FVector AHitScanWeapon::TraceEndWithScatter(const FVector& TraceStart, const FVe
 {
 	FVector DirectionToTarget = (HitTarget - TraceStart).GetSafeNormal();
 	FVector SphereCenter = TraceStart + DirectionToTarget * DistanceToSphere;
+	FVector RandVec = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.f, SohereRadius);
+	FVector EndLoc = SphereCenter + RandVec;
+	FVector ToEndLoc = EndLoc - TraceStart;
 
+	
+	/*DrawDebugSphere(GetWorld(), EndLoc, 4.f, 12, FColor::Orange, true);
 	DrawDebugSphere(GetWorld(),SphereCenter, SohereRadius, 12, FColor::Red, true);
+	DrawDebugLine(GetWorld(),
+		TraceStart,
+		TraceStart + 80000.f * ToEndLoc / ToEndLoc.Size(),
+		FColor::Cyan,
+		true);
+	*/
+	return FVector(TraceStart + 80000.f * ToEndLoc / ToEndLoc.Size());
+}
 
-	return FVector::ZeroVector;
+void AHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit)
+{
+	FHitResult FireHit;
+	UWorld* World = GetWorld();
+	const USkeletalMeshSocket* MuzzleSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash");
+
+	if(World)
+	{
+		FVector End = bUseScatter? TraceEndWithScatter(TraceStart, HitTarget) : TraceStart + (HitTarget - TraceStart) * 1.25f;
+		World->LineTraceSingleByChannel(
+			OutHit,
+			TraceStart,
+			End,
+			ECC_Visibility
+			);
+		FVector BeamEnd = End;
+		if(OutHit.bBlockingHit)
+			BeamEnd = OutHit.ImpactPoint;
+		if(BeamParticles)
+		{
+			UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(World,
+				BeamParticles,
+				TraceStart,
+				FRotator::ZeroRotator);
+			if(Beam)
+			{
+				Beam->SetVectorParameter(FName("Target"), BeamEnd);
+			}
+		}
+	}
 }
