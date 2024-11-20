@@ -57,6 +57,7 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Here"));
 	if(Character == nullptr || WeaponToEquip == nullptr) return;
 	if(EquippedWeapon)
 	{
