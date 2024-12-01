@@ -34,7 +34,7 @@ private:
 	class USphereComponent* OverlapSphere;
 
 	UPROPERTY(EditAnywhere)
-	USoundCue* PickupSound;
+	class USoundCue* PickupSound;
 
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* PickupMesh;

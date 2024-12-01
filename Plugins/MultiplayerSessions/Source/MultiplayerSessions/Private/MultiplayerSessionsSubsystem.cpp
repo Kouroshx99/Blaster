@@ -76,7 +76,7 @@ void UMultiplayerSessionsSubsystem::FindSessions(int32 MaxSearchResults)
 	if (!SessionInterface->FindSessions(*LocalPlayer->GetPreferredUniqueNetId(), LastSessionSearch.ToSharedRef()))
 	{
 		SessionInterface->ClearOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegateHandle);
-
+		UE_LOG(LogTemp, Warning, TEXT("Here"));
 		MultiplayerOnFindSessionsComplete.Broadcast(TArray<FOnlineSessionSearchResult>(), false);
 	}
 }
